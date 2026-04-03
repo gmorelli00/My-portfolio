@@ -1,17 +1,33 @@
-import { Fragment } from "react";
+import { CONTACT_INFO } from '../constants';
 
 function Footer() {
   return (
-    <Fragment>
-      <footer className="mt-50 w-full h-150 text-white flex flex-col justify-center items-center space-y-2 font-montserrat font-thin">
-        <h1 id="contact" className="text-5xl font-bold">Contact</h1>
-        <div className="flex flex-col justify-center items-center mt-20 w-full space-y-1">
-            <p className="text-lg">Email: <a href="mailto:morelligiovannimg@gmail.com" className="text-blue-500 hover:underline">morelligiovannimg@gmail.com</a></p>
-            <p className="text-lg">LinkedIn: <a href="https://www.linkedin.com/in/giovanni-morelli-272a1a330/" className="text-blue-500 hover:underline">linkedin.com/in/giovanni-morelli-272a1a330/</a></p>
-            <p className="text-lg">GitHub: <a href="https://github.com/gmorelli00" className="text-blue-500 hover:underline">github.com/gmorelli00</a></p>
-        </div>
-      </footer>
-    </Fragment>
+    <footer className="mt-16 md:mt-24 lg:mt-32 w-full py-12 md:py-16 lg:py-20 text-white flex flex-col justify-center items-center space-y-6 md:space-y-8 font-montserrat font-thin px-4">
+      <h2 id="contact" className="text-3xl md:text-4xl lg:text-5xl font-bold text-center">
+        Contact
+      </h2>
+
+      <div className="flex flex-col justify-center items-center mt-6 md:mt-8 w-full space-y-3 md:space-y-4">
+        {CONTACT_INFO.map((contact) => (
+          <p key={contact.platform} className="text-base md:text-lg text-center break-words">
+            <span className="font-semibold">{contact.platform}:</span>{' '}
+            <a
+              href={contact.url}
+              target={contact.platform !== 'Email' ? '_blank' : undefined}
+              rel={contact.platform !== 'Email' ? 'noopener noreferrer' : undefined}
+              className="text-blue-500 hover:text-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 rounded px-1 transition-colors"
+              aria-label={contact.ariaLabel}
+            >
+              {contact.label}
+            </a>
+          </p>
+        ))}
+      </div>
+
+      <p className="text-sm text-gray-400 mt-8">
+        © 2024 Giovanni Morelli. All rights reserved.
+      </p>
+    </footer>
   );
 }
 
