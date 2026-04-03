@@ -12,7 +12,7 @@ function Home() {
       />
 
       {/* Hero Section */}
-      <section className="flex flex-col lg:flex-row min-h-screen gap-6 md:gap-10 justify-center items-center px-4 md:px-8 pt-32 md:pt-40">
+      <section id="home" className="flex flex-col lg:flex-row min-h-screen gap-6 md:gap-10 justify-center items-center px-4 md:px-8 pt-32 md:pt-40">
         <div className="flex w-full lg:w-1/2 justify-center items-center order-2 lg:order-1">
           <img
             src="./images/me.svg"

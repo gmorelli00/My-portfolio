@@ -1,7 +1,7 @@
 import type { Project, NavLink, ContactInfo } from '../types';
 
 export const NAV_LINKS: NavLink[] = [
-  { name: 'Home', href: '/', type: 'link' },
+  { name: 'Home', href: 'home', type: 'scroll' },
   { name: 'Projects', href: 'projects', type: 'scroll' },
   { name: 'Contact', href: 'contact', type: 'scroll' },
 ];
