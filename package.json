@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "homepage": "https://gmorelli00.github.io/My-portfolio",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -32,6 +33,5 @@
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.35.1",
     "vite": "^7.0.4"
-  },
-  "homepage": "https://gmorelli00.github.io/My-portfolio"
+  }
 }

@@ -23,10 +23,6 @@ function Footer() {
           </p>
         ))}
       </div>
-
-      <p className="text-sm text-gray-400 mt-8">
-        © 2024 Giovanni Morelli. All rights reserved.
-      </p>
     </footer>
   );
 }
