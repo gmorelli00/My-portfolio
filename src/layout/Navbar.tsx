@@ -13,7 +13,7 @@ function Navbar() {
 
   return (
     <nav
-      className="fixed md:top-4 bottom-4 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] md:w-auto rounded-3xl md:rounded-4xl z-50 bg-gradient-to-br from-white/10 via-cyan-200/10 to-white/10 backdrop-blur-xs backdrop-saturate-150 border border-white/20 shadow-xl bg-[length:400%_400%] animate-glass-glow transition-all duration-300"
+      className="fixed top-4 left-1/2 transform -translate-x-1/2 w-[calc(100%-2rem)] md:w-auto mt-5 rounded-3xl md:rounded-full z-50 bg-gradient-to-br from-white/10 via-cyan-200/10 to-white/10 backdrop-blur-xs backdrop-saturate-150 border-b border-white/20 shadow-xl bg-[length:400%_400%] animate-glass-glow transition-all duration-300"
       role="navigation"
       aria-label="Main navigation"
     >
