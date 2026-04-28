@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 
 const Avatar: React.FC = () => {
-  const { scene } = useGLTF("face.glb");
+  const { scene } = useGLTF("Face.glb");
 
   const headRef = useRef<THREE.Object3D | null>(null);
   const eyeLRef = useRef<THREE.Object3D | null>(null);
