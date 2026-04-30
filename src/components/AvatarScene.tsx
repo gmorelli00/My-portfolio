@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 
 const Avatar: React.FC = () => {
-  const { scene } = useGLTF("Face.glb");
+  const { scene } = useGLTF("public/Face.glb");
 
   const headRef = useRef<THREE.Object3D | null>(null);
   const eyeLRef = useRef<THREE.Object3D | null>(null);
@@ -24,7 +24,7 @@ const Avatar: React.FC = () => {
     if (!eyeLRef.current || !eyeRRef.current) return;
 
     // Calcola il punto dove gli occhi devono guardare (distanza maggiore)
-    const targetPoint = new THREE.Vector3(mouse.x * 3, mouse.y * 3, 10);
+    const targetPoint = new THREE.Vector3(mouse.x * 3, mouse.y * 3, 20);
 
     // Applica la rotazione agli occhi
     eyeLRef.current.lookAt(targetPoint);
@@ -41,7 +41,8 @@ const Avatar: React.FC = () => {
       headRef.current.rotation.x += (targetX ) * lerpFactor;
       
       // Clamp la rotazione X tra -0.2 e 0.2 radianti
-      headRef.current.rotation.x = Math.max(0.6, Math.min(0.7, headRef.current.rotation.x));
+      headRef.current.rotation.x = Math.max(0.7, Math.min(0.8, headRef.current.rotation.x));
+      headRef.current.rotation.y = Math.max(0, Math.min(0.2, headRef.current.rotation.y))
     }
   });
 
