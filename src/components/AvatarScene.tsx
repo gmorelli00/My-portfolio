@@ -42,7 +42,7 @@ const getResponsiveScale = (width: number) => {
 };
 
 const Avatar: React.FC<{ scale: number }> = ({ scale }) => {
-  const { scene } = useGLTF("public/Face.glb");
+  const { scene } = useGLTF("/Face.glb");
 
   const headRef = useRef<THREE.Object3D | null>(null);
   const eyeLRef = useRef<THREE.Object3D | null>(null);
