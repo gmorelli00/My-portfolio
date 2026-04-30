@@ -17,12 +17,12 @@ function Home() {
 
       {/* Hero Section */}
       <section id="home" className="flex flex-col lg:flex-row min-h-screen gap-6 md:gap-10 justify-center items-center px-4 md:px-8 pt-32 md:pt-40">
-        <div className="flex w-full lg:w-1/2 justify-center items-center order-2 lg:order-1">
-          <div className="h-screen md:h-screen lg:h-screen w-full">
+        <div className="flex w-full lg:w-1/2 justify-center items-center order-1 lg:order-1">
+          <div className="h-96 md:h-screen lg:h-screen w-full">
             <AvatarScene />
           </div>
         </div>
-        <article className="flex flex-col w-full lg:w-1/2 justify-center items-start text-white text-start order-1 lg:order-2">
+        <article className="flex flex-col w-full lg:w-1/2 justify-center items-start text-white text-start order-2 lg:order-2">
           <TitleWithParallax />
         </article>
       </section>

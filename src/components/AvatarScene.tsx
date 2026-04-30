@@ -1,9 +1,47 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, useGLTF } from "@react-three/drei";
 
-const Avatar: React.FC = () => {
+// Hook per monitorare le dimensioni della finestra
+const useWindowSize = () => {
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return windowSize;
+};
+
+// Funzione per calcolare zoom responsivo
+const getResponsiveZoom = (width: number) => {
+  if (width < 640) return 80; // mobile
+  if (width < 1024) return 100; // tablet
+  if (width < 1536) return 140; // laptop
+  return 150; // desktop
+};
+
+// Funzione per calcolare scala responsiva
+const getResponsiveScale = (width: number) => {
+  if (width < 640) return 2;
+  if (width < 1024) return 2.3;
+  if (width < 1536) return 2.7;
+  return 3;
+};
+
+const Avatar: React.FC<{ scale: number }> = ({ scale }) => {
   const { scene } = useGLTF("public/Face.glb");
 
   const headRef = useRef<THREE.Object3D | null>(null);
@@ -46,32 +84,35 @@ const Avatar: React.FC = () => {
     }
   });
 
-  return <primitive object={scene} scale={3} position={[0, 0, 0]} />;
+  return <primitive object={scene} scale={scale} position={[0, 0, 0]} />;
 };
 
 const AvatarScene: React.FC = () => {
+  const { width } = useWindowSize();
+  const zoom = getResponsiveZoom(width);
+  const scale = getResponsiveScale(width);
+
   return (
-<Canvas
-  orthographic
-  camera={{
-    position: [-2, 0, 4],
-    zoom: 150, // 🔥 questo sostituisce il fov
-  }}
->
-  <ambientLight intensity={0.9} />
-<directionalLight
-  position={[-10, 10, 10]}
-  intensity={2.5}
+    <div style={{ width: "100%", height: "100%", minHeight: "400px" }}>
+      <Canvas
+        orthographic
+        camera={{
+          position: [-2, 0, 5],
+          zoom: zoom,
+        }}
+      >
+        <ambientLight intensity={0.9} />
+        <directionalLight position={[-10, 10, 10]} intensity={2.5} />
+        <directionalLight position={[10, 10, 10]} intensity={2.5} />
 
-/>
-<directionalLight
-  position={[10, 10, 10]}
-  intensity={2.5}
-/>
-
-  <Avatar />
-  <OrbitControls enablePan={false} enableZoom={false} enableRotate={false} />
-</Canvas>
+        <Avatar scale={scale} />
+        <OrbitControls
+          enablePan={false}
+          enableZoom={false}
+          enableRotate={false}
+        />
+      </Canvas>
+    </div>
   );
 };
 
