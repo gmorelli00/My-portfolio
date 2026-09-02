@@ -2,6 +2,7 @@ import type { Project, NavLink, ContactInfo } from '../types';
 
 export const NAV_LINKS: NavLink[] = [
   { name: 'Home', href: 'home', type: 'scroll' },
+  { name: 'About', href: 'about', type: 'scroll' },
   { name: 'Projects', href: 'projects', type: 'scroll' },
   { name: 'Contact', href: 'contact', type: 'scroll' },
 ];
@@ -10,34 +11,43 @@ export const PROJECTS: Project[] = [
   {
     id: 'cocktail-debacle',
     title: 'Cocktail Debacle',
+    year: '2025',
+    summary:
+      'Web app full-stack sul mondo dei cocktail: ricerca globale, ricette condivise, recensioni e profili utente.',
     description:
-      'Cocktail Débâcle WebApp is a full-stack web application dedicated to the world of cocktails, developed with a TypeScript frontend and an ASP.NET backend with SQL Server. The project features a modern and responsive interface with reusable components, a global search bar, user profile management with created and favorite cocktails, recipe creation and sharing, and a review system. The infrastructure is containerized with Docker and orchestrated through Nginx as a reverse proxy, ensuring portability, reliability, and scalability.',
-    image: './images/cd.jpeg',
+      'Frontend in TypeScript e backend ASP.NET con SQL Server. Interfaccia responsive costruita su componenti riutilizzabili, con barra di ricerca globale, gestione del profilo (cocktail creati e preferiti), creazione e condivisione di ricette e sistema di recensioni. L’infrastruttura è containerizzata con Docker e orchestrata dietro Nginx come reverse proxy.',
+    stack: ['TypeScript', 'ASP.NET', 'SQL Server', 'Docker', 'Nginx'],
+    image: `${import.meta.env.BASE_URL}images/cd.webp`,
     imageAlt:
       'Cocktail Debacle full-stack web application with TypeScript frontend and ASP.NET backend',
     github: 'https://github.com/gmorelli00/Cocktail-Debacle',
-    reverse: false,
   },
   {
     id: 'transcendence',
     title: 'Transcendence',
+    year: '2025',
+    summary:
+      'Pong multiplayer in tempo reale con grafica 3D, avversario IA e autenticazione OAuth2 — progetto finale a 42.',
     description:
-      'Transcendence is a web application developed as the final project at 42, focused on building a real-time multiplayer Pong game. The project was implemented as a Single Page Application (SPA) with a Vanilla JavaScript frontend and Three.js for 3D graphics, and a Django backend. The application integrates OAuth2 authentication via 42 Network, multilingual support through JSON-based translations, and an artificial intelligence opponent capable of simulating inputs and anticipating actions. The entire system was designed to be modular, scalable, and with strong attention to user experience.',
-    image: './images/ft_t.png',
+      'Single Page Application con frontend in JavaScript vanilla e Three.js per la grafica 3D, backend Django. Integra autenticazione OAuth2 tramite 42 Network, supporto multilingua basato su traduzioni JSON e un avversario artificiale che simula gli input e anticipa le azioni del giocatore. Sistema progettato per essere modulare e scalabile.',
+    stack: ['JavaScript', 'Three.js', 'Django', 'WebSocket', 'OAuth2'],
+    image: `${import.meta.env.BASE_URL}images/ft_t.webp`,
     imageAlt: 'Transcendence multiplayer Pong game application with 3D graphics',
     github: 'https://github.com/gmorelli00/ft_transcendence',
-    reverse: true,
   },
   {
     id: 'ascom-project',
     title: 'Ascom Project',
+    year: '2025',
+    summary:
+      'Interfaccia React per la gestione pazienti su API REST protette: griglia con allarmi, filtri e dialog di modifica.',
     description:
-      'Ascom Project is a frontend application developed in React as part of a technical assessment. The goal was to build a patient management interface consuming protected REST APIs. The application includes a grid displaying patient data with alarms, filtering and sorting functionalities, and a detail/edit dialog to view and update patient information along with associated parameters. The project focused on creating reusable components, ensuring responsive design, and integrating API communication with secure authentication.',
-    image: './images/ascom.png',
+      'Applicazione frontend sviluppata in React come prova tecnica. Griglia dei dati paziente con allarmi, funzioni di filtro e ordinamento, e dialog di dettaglio per visualizzare e aggiornare le informazioni e i parametri associati. Il lavoro si è concentrato su componenti riutilizzabili, design responsive e comunicazione con API autenticate.',
+    stack: ['React', 'TypeScript', 'REST API', 'Auth'],
+    image: `${import.meta.env.BASE_URL}images/ascom.webp`,
     imageAlt:
       'Ascom patient management interface with data grid and filtering capabilities',
     github: 'https://github.com/gmorelli00/ascom_project',
-    reverse: false,
   },
 ];
 
@@ -50,7 +60,7 @@ export const CONTACT_INFO: ContactInfo[] = [
   },
   {
     platform: 'LinkedIn',
-    label: 'giovanni-morelli-272a1a330',
+    label: 'giovanni-morelli',
     url: 'https://www.linkedin.com/in/giovanni-morelli-272a1a330/',
     ariaLabel: 'Visit LinkedIn profile',
   },
@@ -61,3 +71,13 @@ export const CONTACT_INFO: ContactInfo[] = [
     ariaLabel: 'Visit GitHub profile',
   },
 ];
+
+/** Mostrato nella sezione About: rende leggibile lo stack in 3 secondi. */
+export const SKILLS: { group: string; items: string[] }[] = [
+  { group: 'Frontend', items: ['React', 'TypeScript', 'Tailwind', 'Three.js', 'Vite'] },
+  { group: 'Backend', items: ['Node.js', 'Django', 'ASP.NET', 'SQL Server'] },
+  { group: 'Systems', items: ['C', 'C++', 'Bash', 'Docker', 'Nginx'] },
+];
+
+/** Riferimento stabile per useActiveSection (evita effetti che si ri-eseguono). */
+export const SECTION_IDS: string[] = NAV_LINKS.map((link) => link.href);

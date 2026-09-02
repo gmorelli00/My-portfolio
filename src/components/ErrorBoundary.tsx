@@ -2,6 +2,8 @@ import React from 'react';
 
 interface Props {
   children: React.ReactNode;
+  /** Sostituisce la schermata d'errore: utile per isolare un singolo widget. */
+  fallback?: React.ReactNode;
 }
 
 interface State {
@@ -25,16 +27,18 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   public render() {
     if (this.state.hasError) {
+      if (this.props.fallback !== undefined) return this.props.fallback;
+
       return (
         <div className="flex flex-col justify-center items-center min-h-screen px-4">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">Oops!</h1>
-            <p className="text-white/80 text-lg mb-6">
+            <h1 className="mb-4 text-4xl font-bold text-white md:text-5xl">Oops!</h1>
+            <p className="mb-6 text-lg text-muted">
               Something went wrong. Please try refreshing the page.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+              className="rounded-full bg-accent px-6 py-2.5 font-medium text-ink-deep transition-colors hover:bg-accent-bright"
             >
               Refresh Page
             </button>

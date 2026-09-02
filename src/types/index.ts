@@ -7,11 +7,15 @@ export type NavLink = {
 export type Project = {
   id: string;
   title: string;
+  /** Una riga che si legge in 2 secondi: è quella che decide se aprire il resto. */
+  summary: string;
   description: string;
+  stack: string[];
+  year: string;
   image: string;
   imageAlt: string;
   github: string;
-  reverse: boolean;
+  demo?: string;
 };
 
 export type ContactInfo = {

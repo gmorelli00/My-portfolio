@@ -1,86 +1,85 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { OrbitControls, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 
-// Hook per monitorare le dimensioni della finestra
-const useWindowSize = () => {
-  const [windowSize, setWindowSize] = useState({
-    width: typeof window !== "undefined" ? window.innerWidth : 0,
-    height: typeof window !== "undefined" ? window.innerHeight : 0,
-  });
+const MODEL_URL = `${import.meta.env.BASE_URL}Face.glb`;
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
+/** Centro della bounding box del modello (scala 3): inquadra la testa al centro. */
+const MODEL_CENTER: [number, number, number] = [-0.98, -0.2, 5];
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+/** Misura il contenitore: il framing dipende dal box, non dalla finestra. */
+const useElementSize = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [size, setSize] = useState(0);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setSize(Math.min(entry.contentRect.width, entry.contentRect.height));
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
 
-  return windowSize;
+  return [ref, size] as const;
 };
 
-// Funzione per calcolare zoom responsivo
-const getResponsiveZoom = (width: number) => {
-  if (width < 640) return 80; // mobile
-  if (width < 1024) return 100; // tablet
-  if (width < 1536) return 140; // laptop
-  return 150; // desktop
-};
-
-// Funzione per calcolare scala responsiva
-const getResponsiveScale = (width: number) => {
-  if (width < 640) return 2;
-  if (width < 1024) return 2.3;
-  if (width < 1536) return 2.7;
-  return 3;
+/** Tiene lo zoom della camera allineato al box anche dopo un resize. */
+const CameraSync: React.FC<{ zoom: number }> = ({ zoom }) => {
+  const camera = useThree((state) => state.camera) as THREE.OrthographicCamera;
+  useEffect(() => {
+    camera.zoom = zoom;
+    camera.updateProjectionMatrix();
+  }, [camera, zoom]);
+  return null;
 };
 
 const Avatar: React.FC<{ scale: number }> = ({ scale }) => {
-  const { scene } = useGLTF("Face.glb");
+  const { scene } = useGLTF(MODEL_URL);
 
   const headRef = useRef<THREE.Object3D | null>(null);
   const eyeLRef = useRef<THREE.Object3D | null>(null);
   const eyeRRef = useRef<THREE.Object3D | null>(null);
+  const trackRef = useRef(true);
 
   const { mouse } = useThree();
 
   // trova gli oggetti UNA VOLTA
-  React.useEffect(() => {
+  useEffect(() => {
     headRef.current = scene.getObjectByName("Osso001") ?? null;
     eyeLRef.current = scene.getObjectByName("Real_Blue_Eye") ?? null;
     eyeRRef.current = scene.getObjectByName("Real_Blue_Eye002") ?? null;
   }, [scene]);
 
-  // Tracking del mouse - occhi seguono il cursore e testa si muove leggermente
+  // Chi ha chiesto meno animazioni non si vede seguire dagli occhi.
+  useEffect(() => {
+    const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => (trackRef.current = !mql.matches);
+    sync();
+    mql.addEventListener("change", sync);
+    return () => mql.removeEventListener("change", sync);
+  }, []);
+
   useFrame(() => {
+    if (!trackRef.current) return;
     if (!eyeLRef.current || !eyeRRef.current) return;
 
-    // Calcola il punto dove gli occhi devono guardare (distanza maggiore)
     const targetPoint = new THREE.Vector3(mouse.x * 3, mouse.y * 3, 20);
-
-    // Applica la rotazione agli occhi
     eyeLRef.current.lookAt(targetPoint);
     eyeRRef.current.lookAt(targetPoint);
 
-    // Movimento smooth della testa con interpolazione
     if (headRef.current) {
       const targetY = mouse.x * 0.3;
-      const targetX = -mouse.y * 0.2; // Rotazione leggera verso l'alto/basso
-      
-      // Interpolazione (lerp) per movimento smooth
-      const lerpFactor = 0.1; // regola per più/meno smoothness (0.1 = molto smooth, 0.5 = meno smooth)
+      const targetX = -mouse.y * 0.2;
+      const lerpFactor = 0.1;
+
       headRef.current.rotation.y += (targetY - headRef.current.rotation.y) * lerpFactor;
-      headRef.current.rotation.x += (targetX ) * lerpFactor;
-      
-      // Clamp la rotazione X tra -0.2 e 0.2 radianti
+      headRef.current.rotation.x += targetX * lerpFactor;
+
       headRef.current.rotation.x = Math.max(0.7, Math.min(0.8, headRef.current.rotation.x));
-      headRef.current.rotation.y = Math.max(0, Math.min(0.2, headRef.current.rotation.y))
+      headRef.current.rotation.y = Math.max(0, Math.min(0.2, headRef.current.rotation.y));
     }
   });
 
@@ -88,32 +87,32 @@ const Avatar: React.FC<{ scale: number }> = ({ scale }) => {
 };
 
 const AvatarScene: React.FC = () => {
-  const { width } = useWindowSize();
-  const zoom = getResponsiveZoom(width);
-  const scale = getResponsiveScale(width);
+  const [ref, size] = useElementSize();
+
+  // Camera ortografica: le unità di mondo visibili sono size / zoom, quindi
+  // legare lo zoom al lato del box mantiene la stessa inquadratura ovunque.
+  const zoom = size ? size * 0.19 : 100;
 
   return (
-    <div style={{ width: "100%", height: "100%", minHeight: "400px" }}>
-      <Canvas
-        orthographic
-        camera={{
-          position: [-2, 0, 5],
-          zoom: zoom,
-        }}
-      >
-        <ambientLight intensity={0.9} />
-        <directionalLight position={[-10, 10, 10]} intensity={2.5} />
-        <directionalLight position={[10, 10, 10]} intensity={2.5} />
-
-        <Avatar scale={scale} />
-        <OrbitControls
-          enablePan={false}
-          enableZoom={false}
-          enableRotate={false}
-        />
-      </Canvas>
+    <div ref={ref} className="h-full w-full">
+      {size > 0 && (
+        <Canvas
+          dpr={[1, 2]}
+          gl={{ antialias: true, alpha: true }}
+          orthographic
+          camera={{ position: MODEL_CENTER, zoom }}
+        >
+          <ambientLight intensity={0.9} />
+          <directionalLight position={[-10, 10, 10]} intensity={2.5} />
+          <directionalLight position={[10, 10, 10]} intensity={2.5} />
+          <CameraSync zoom={zoom} />
+          <Avatar scale={3} />
+        </Canvas>
+      )}
     </div>
   );
 };
+
+useGLTF.preload(MODEL_URL);
 
 export default AvatarScene;

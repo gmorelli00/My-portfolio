@@ -1,33 +1,182 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------
+   Font — percorsi relativi al CSS: Vite li risolve e li versiona,
+   così funzionano anche sotto la base /My-portfolio/ di gh-pages.
+   --------------------------------------------------------------- */
 @font-face {
-    font-family: 'Montserrat';
-    src: url('/font/static/Montserrat-Regular.ttf') format('truetype');
-    font-weight: 400;
+  font-family: 'Montserrat';
+  src: url('../assets/fonts/Montserrat-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../assets/fonts/Montserrat-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../assets/fonts/Montserrat-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('../assets/fonts/Montserrat-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-display: swap;
 }
 
-@font-face {
-    font-family: 'Montserrat';
-    src: url('/font/static/Montserrat-Bold.ttf') format('truetype');
-    font-weight: 700;
+/* ---------------------------------------------------------------
+   Design token (Tailwind v4: i token vivono qui, non in un config)
+   --------------------------------------------------------------- */
+@theme {
+  --font-sans: 'Montserrat', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, monospace;
+
+  /* Un solo accento, declinato. Niente arcobaleno. */
+  --color-ink: oklch(0.155 0.012 265);
+  --color-ink-deep: oklch(0.115 0.012 265);
+  --color-accent: oklch(0.74 0.15 240);
+  --color-accent-bright: oklch(0.86 0.11 215);
+  --color-muted: oklch(0.72 0.02 265);
+
+  --radius-card: 1.25rem;
+
+  --animate-glass-glow: glass-glow 8s ease-in-out infinite;
+  --animate-rise: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-@font-face {
-    font-family: 'Montserrat';
-    src: url('/font/static/Montserrat-Thin.ttf') format('truetype');
-    font-weight: 100;
+@keyframes glass-glow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: none; }
 }
 
+/* ---------------------------------------------------------------
+   Base
+   --------------------------------------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: white;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Luci di colore ancorate al viewport: sostituiscono il gradiente grigio */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(60rem 45rem at 15% -10%, oklch(0.5 0.14 250 / 0.20), transparent 62%),
+      radial-gradient(55rem 40rem at 95% 12%, oklch(0.52 0.11 320 / 0.13), transparent 60%),
+      radial-gradient(70rem 50rem at 50% 108%, oklch(0.48 0.10 210 / 0.14), transparent 62%);
+  }
+
+  /* Grana: elimina il banding dei gradienti su schermi a 8 bit */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* I titoli grandi hanno bisogno di tracking negativo */
+  h1, h2, h3 {
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-ink-deep);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent-bright);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Utilities
+   --------------------------------------------------------------- */
 @layer utilities {
-  .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  .glass {
+    background: color-mix(in oklab, white 5%, transparent);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    border: 1px solid color-mix(in oklab, white 10%, transparent);
   }
 
-  .liquid-mesh {
-    background: radial-gradient(at 0% 0%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  /* Etichetta editoriale sopra i titoli di sezione */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--color-muted);
   }
+
+  /* Ingresso allo scroll: attivato da IntersectionObserver */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal[data-visible='true'] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Underline animata per i link testuali */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Accessibilità: rispetta chi ha disattivato le animazioni
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal { opacity: 1; transform: none; }
 }

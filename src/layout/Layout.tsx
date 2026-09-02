@@ -6,17 +6,17 @@ function Layout() {
   return (
     <ErrorBoundary>
       <>
-        {/* Skip Link for Accessibility */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-0 focus:left-0 focus:z-50 focus:bg-blue-500 focus:text-white focus:px-4 focus:py-2"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-full focus:bg-accent focus:px-5 focus:py-2.5 focus:text-sm focus:font-medium focus:text-ink-deep"
         >
           Skip to main content
         </a>
 
         <Navbar />
 
-        <main id="main-content" className="min-h-screen pb-24 md:pb-0">
+        {/* Il padding basso lascia spazio alla tab bar mobile */}
+        <main id="main-content" className="pb-28 md:pb-0">
           <Outlet />
         </main>
       </>

@@ -1,9 +1,37 @@
+import { Suspense, lazy, type ReactNode } from 'react';
 import { SEO } from '../components/SEO';
+import { ErrorBoundary } from '../components/ErrorBoundary';
+import Hero from '../components/Hero';
 import About from '../layout/About';
 import Projects from '../layout/Projects';
 import Footer from '../layout/Footer';
-import AvatarScene from '../components/AvatarScene';
-import TitleWithParallax from '../components/TitleWithParallax';
+
+// three.js pesa ~800 KB: tenerlo fuori dal bundle iniziale rende
+// il primo paint immediato e carica la scena solo quando serve.
+const AvatarScene = lazy(() => import('../components/AvatarScene'));
+
+function AvatarFrame({ children }: { children: ReactNode }) {
+  return (
+    <div className="relative aspect-square w-full max-w-[34rem]">
+      {/* Alone dietro all'avatar: lo àncora invece di lasciarlo galleggiare */}
+      <span
+        aria-hidden
+        className="absolute inset-[8%] -z-10 rounded-full bg-accent/20 blur-3xl"
+      />
+      {children}
+    </div>
+  );
+}
+
+function AvatarFallback() {
+  return (
+    <img
+      src={`${import.meta.env.BASE_URL}images/me.svg`}
+      alt="Illustrazione di Giovanni Morelli"
+      className="h-full w-full object-contain"
+    />
+  );
+}
 
 function Home() {
   return (
@@ -13,34 +41,30 @@ function Home() {
         description="Giovanni Morelli - Full Stack Developer. Specializing in React, TypeScript, and modern web technologies."
       />
 
-
-
-      {/* Hero Section */}
-      <section id="home" className="flex flex-col lg:flex-row min-h-screen gap-6 md:gap-10 justify-center items-center px-4 md:px-8 pt-32 md:pt-40">
-        <div className="flex w-full lg:w-1/2 justify-center items-center order-1 lg:order-1">
-          <div className="h-96 md:h-screen lg:h-screen w-full">
-            <AvatarScene />
-          </div>
+      <section
+        id="home"
+        className="mx-auto flex min-h-[100svh] w-full max-w-6xl scroll-mt-28 flex-col-reverse items-center gap-10 px-6 pb-24 pt-28 md:px-8 lg:flex-row lg:gap-16 lg:pt-32"
+      >
+        <div className="flex w-full items-center justify-center lg:w-1/2">
+          <AvatarFrame>
+            {/* Se WebGL non è disponibile o il modello non carica,
+                cade sull'illustrazione invece di far saltare la pagina. */}
+            <ErrorBoundary fallback={<AvatarFallback />}>
+              <Suspense fallback={<div className="h-full w-full animate-pulse rounded-full bg-white/5" />}>
+                <AvatarScene />
+              </Suspense>
+            </ErrorBoundary>
+          </AvatarFrame>
         </div>
-        <article className="flex flex-col w-full lg:w-1/2 justify-center items-start text-white text-start order-2 lg:order-2">
-          <TitleWithParallax />
-        </article>
+
+        <div className="flex w-full items-center lg:w-1/2">
+          <Hero />
+        </div>
       </section>
 
-      {/* About Section */}
-      <section className="flex flex-col px-4 md:px-8 lg:px-20 py-12 md:py-20 justify-start items-start font-montserrat font-thin">
-        <About />
-      </section>
-
-      {/* Projects Section */}
-      <section className="flex flex-col px-4 md:px-8 lg:px-20 py-12 md:py-20 justify-start items-start font-montserrat font-thin">
-        <Projects />
-      </section>
-
-      {/* Footer Section */}
-      <section className="flex w-full px-4 md:px-8 lg:px-20 justify-center items-center">
-        <Footer />
-      </section>
+      <About />
+      <Projects />
+      <Footer />
     </>
   );
 }

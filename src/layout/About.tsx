@@ -1,24 +1,55 @@
+import { Section, SectionHeader } from '../components/Section';
+import { Reveal } from '../components/Reveal';
+import { SKILLS } from '../constants';
+
 function About() {
   return (
-    <>
-      <article className="text-white w-full">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-montserrat mb-4 md:mb-6">
-          About me
-        </h2>
-        <p className="text-base md:text-lg font-montserrat font-thin leading-relaxed max-w-3xl">
-          Junior software developer with a strong technical background acquired at 42 Firenze. Excellent command of C, C++, Bash, and web technologies. Proactive personality, quick learner, and experienced in working in peer-to-peer team environments. I am passionate about developing web applications and software, with a particular focus on frontend development. I enjoy turning ideas and concepts into intuitive and functional interfaces, paying attention to both user experience and visual design.
-        </p>
-      </article>
+    <Section id="about">
+      <SectionHeader index="01" title="About" kicker="Background" />
 
-      <article className="text-white w-full mt-12 md:mt-16 lg:mt-20 lg:text-left">
-        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-montserrat mb-4 md:mb-6">
-          Interests
-        </h2>
-        <p className="text-base md:text-lg font-montserrat font-thin leading-relaxed max-w-3xl">
-          My goal is to grow as a frontend developer by deepening my knowledge of modern frameworks and best practices in web development. I aspire to work on innovative projects that allow me to combine creativity and technical skills, contributing to scalable and high-quality solutions.
-        </p>
-      </article>
-    </>
+      <div className="grid gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-20">
+        <div className="flex flex-col gap-6">
+          <Reveal delay={80}>
+            <p className="max-w-[62ch] text-lg leading-relaxed text-white md:text-xl">
+              Sviluppatore software con una base tecnica costruita a{' '}
+              <span className="text-accent-bright">42 Firenze</span>: C, C++, Bash e
+              tecnologie web. Mi muovo bene in team peer-to-peer e imparo in fretta.
+            </p>
+          </Reveal>
+          <Reveal delay={160}>
+            <p className="max-w-[62ch] leading-relaxed text-muted">
+              Quello che mi interessa davvero è il frontend: trasformare idee e concetti in
+              interfacce intuitive, curando insieme l&apos;esperienza d&apos;uso e il design
+              visivo. Il mio obiettivo è crescere approfondendo i framework moderni e le best
+              practice, lavorando su progetti dove creatività e competenza tecnica si
+              incontrano.
+            </p>
+          </Reveal>
+        </div>
+
+        <Reveal delay={240}>
+          <dl className="flex flex-col gap-8">
+            {SKILLS.map((group) => (
+              <div key={group.group} className="flex flex-col gap-3">
+                <dt className="eyebrow">{group.group}</dt>
+                <dd>
+                  <ul className="flex flex-wrap gap-2">
+                    {group.items.map((item) => (
+                      <li
+                        key={item}
+                        className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 font-mono text-xs text-muted transition-colors hover:border-accent/40 hover:text-white"
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </Reveal>
+      </div>
+    </Section>
   );
 }
 

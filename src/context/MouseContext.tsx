@@ -1,42 +1,39 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
-interface MousePosition {
-  x: number;
-  y: number;
-}
-
-interface MouseContextType {
-  mouse: MousePosition;
-}
-
-const MouseContext = createContext<MouseContextType | undefined>(undefined);
-
+/**
+ * Traccia il mouse senza mai chiamare setState: la posizione finisce in due
+ * custom property CSS (--mx / --my) aggiornate una volta per frame, così gli
+ * effetti di parallasse sono pura composizione e l'albero React non ri-renderizza.
+ */
 export const MouseProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [mouse, setMouse] = useState<MousePosition>({ x: 0, y: 0 });
-
   useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      // Normalizza le coordinate tra -1 e 1
-      const x = (event.clientX / window.innerWidth) * 2 - 1;
-      const y = (event.clientY / window.innerHeight) * 2 - 1;
-      setMouse({ x, y });
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fine = window.matchMedia('(pointer: fine)').matches;
+    if (reduced || !fine) return;
+
+    const root = document.documentElement;
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+
+    const flush = () => {
+      frame = 0;
+      root.style.setProperty('--mx', x.toFixed(4));
+      root.style.setProperty('--my', y.toFixed(4));
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    const handleMouseMove = (event: MouseEvent) => {
+      x = (event.clientX / window.innerWidth) * 2 - 1;
+      y = (event.clientY / window.innerHeight) * 2 - 1;
+      if (!frame) frame = requestAnimationFrame(flush);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (frame) cancelAnimationFrame(frame);
+    };
   }, []);
 
-  return (
-    <MouseContext.Provider value={{ mouse }}>
-      {children}
-    </MouseContext.Provider>
-  );
-};
-
-export const useMouseContext = () => {
-  const context = useContext(MouseContext);
-  if (!context) {
-    throw new Error('useMouseContext deve essere usato dentro un MouseProvider');
-  }
-  return context;
+  return <>{children}</>;
 };
