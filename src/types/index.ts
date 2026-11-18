@@ -1,7 +1,6 @@
 export type NavLink = {
   name: string;
   href: string;
-  type: 'link' | 'scroll';
 };
 
 export type Project = {

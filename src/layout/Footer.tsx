@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Section, SectionHeader } from '../components/Section';
 import { Reveal } from '../components/Reveal';
 import { CONTACT_INFO } from '../constants';
+import { L } from '../i18n';
 
 const ICONS: Record<string, ReactNode> = {
   Email: (
@@ -22,56 +23,36 @@ const ICONS: Record<string, ReactNode> = {
 };
 
 function Footer() {
-  const email = CONTACT_INFO.find((c) => c.platform === 'Email');
-
   return (
     <Section id="contact" className="pb-12 md:pb-16">
-      <SectionHeader index="03" title="Contact" kicker="Get in touch" />
+      <SectionHeader index="03" title={L('Contatti', 'Contact')} kicker={L('Scrivimi', 'Get in touch')} />
 
-      <div className="flex flex-col gap-12">
-        <Reveal delay={80}>
-          <p className="max-w-[42ch] text-lg leading-relaxed text-muted">
-            Cerchi qualcuno per il frontend del tuo prodotto? Scrivimi, rispondo sempre.
-          </p>
-        </Reveal>
-
-        {email && (
-          <Reveal delay={160}>
-            <a
-              href={email.url}
-              className="link-underline inline-block break-all text-2xl font-bold text-white transition-colors hover:text-accent-bright sm:text-3xl md:text-4xl lg:text-5xl"
-              aria-label={email.ariaLabel}
-            >
-              {email.label}
-            </a>
-          </Reveal>
-        )}
-
-        <Reveal delay={240}>
-          <ul className="flex flex-wrap gap-3">
-            {CONTACT_INFO.map((contact) => (
-              <li key={contact.platform}>
-                <a
-                  href={contact.url}
-                  target={contact.platform === 'Email' ? undefined : '_blank'}
-                  rel={contact.platform === 'Email' ? undefined : 'noopener noreferrer'}
-                  aria-label={contact.ariaLabel}
-                  className="glass flex items-center gap-2.5 rounded-full px-4 py-2.5 text-sm text-muted transition-colors hover:bg-white/10 hover:text-white"
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden>
-                    {ICONS[contact.platform]}
-                  </svg>
-                  {contact.platform}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </Reveal>
-      </div>
+      <Reveal>
+        <ul className="flex flex-wrap gap-3">
+          {CONTACT_INFO.map((contact) => (
+            <li key={contact.platform}>
+              <a
+                href={contact.url}
+                target={contact.platform === 'Email' ? undefined : '_blank'}
+                rel={contact.platform === 'Email' ? undefined : 'noopener noreferrer'}
+                aria-label={contact.ariaLabel}
+                className="glass flex items-center gap-2.5 rounded-full px-4 py-2.5 text-sm text-muted transition-colors hover:bg-white/10 hover:text-white"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden>
+                  {ICONS[contact.platform]}
+                </svg>
+                {contact.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </Reveal>
 
       <footer className="mt-24 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-8 text-xs text-muted sm:flex-row sm:items-center">
         <p>© {new Date().getFullYear()} Giovanni Morelli</p>
-        <p className="font-mono">Built with React, Three.js &amp; Tailwind</p>
+        <p className="font-mono">
+          {L('Realizzato con React, Three.js e Tailwind', 'Built with React, Three.js and Tailwind')}
+        </p>
       </footer>
     </Section>
   );

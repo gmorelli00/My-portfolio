@@ -27,13 +27,12 @@ interface SectionHeaderProps {
   title: string;
   /** Testo dell'occhiello: descrive la sezione senza ripeterne il titolo. */
   kicker: string;
-  align?: 'start' | 'center';
 }
 
-export function SectionHeader({ index, title, kicker, align = 'start' }: SectionHeaderProps) {
+export function SectionHeader({ index, title, kicker }: SectionHeaderProps) {
   return (
     <Reveal>
-      <header className={`mb-12 flex flex-col gap-3 md:mb-16 ${align === 'center' ? 'items-center text-center' : ''}`}>
+      <header className="mb-12 flex flex-col gap-3 md:mb-16">
         <span className="eyebrow">
           {index} — {kicker}
         </span>

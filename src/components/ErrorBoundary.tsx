@@ -1,4 +1,5 @@
 import React from 'react';
+import { L } from '../i18n';
 
 interface Props {
   children: React.ReactNode;
@@ -34,13 +35,16 @@ export class ErrorBoundary extends React.Component<Props, State> {
           <div className="text-center">
             <h1 className="mb-4 text-4xl font-bold text-white md:text-5xl">Oops!</h1>
             <p className="mb-6 text-lg text-muted">
-              Something went wrong. Please try refreshing the page.
+              {L(
+                'Qualcosa è andato storto. Prova a ricaricare la pagina.',
+                'Something went wrong. Please try refreshing the page.',
+              )}
             </p>
             <button
               onClick={() => window.location.reload()}
               className="rounded-full bg-accent px-6 py-2.5 font-medium text-ink-deep transition-colors hover:bg-accent-bright"
             >
-              Refresh Page
+              {L('Ricarica la pagina', 'Refresh page')}
             </button>
           </div>
         </div>

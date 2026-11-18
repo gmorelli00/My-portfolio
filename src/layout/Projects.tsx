@@ -1,11 +1,12 @@
 import { ProjectCard } from '../components/ProjectCard';
 import { Section, SectionHeader } from '../components/Section';
 import { PROJECTS } from '../constants';
+import { L } from '../i18n';
 
 function Projects() {
   return (
     <Section id="projects">
-      <SectionHeader index="02" title="Projects" kicker="Selected work" />
+      <SectionHeader index="02" title={L('Progetti', 'Projects')} kicker={L('Lavori scelti', 'Selected work')} />
 
       <div className="flex flex-col gap-24 md:gap-32">
         {PROJECTS.map((project, index) => (
