@@ -55,6 +55,13 @@ const { clamp } = THREE.MathUtils;
 const IDLE_AFTER = 3000;
 /** Durata (ms) del cenno della testa al click. */
 const NOD_MS = 700;
+/** Gradi di inclinazione del telefono per portare lo sguardo a fine corsa. */
+const TILT_RANGE = 25;
+/** Sotto questi gradi di variazione è rumore del sensore, non un movimento. */
+const TILT_DEADZONE = 1.5;
+
+/** iOS espone il giroscopio solo dopo questa richiesta, fatta da un tocco. */
+type OrientationPermission = { requestPermission?: () => Promise<string> };
 
 interface AvatarProps {
   scale: number;
@@ -121,8 +128,34 @@ const Avatar: React.FC<AvatarProps> = ({ scale, track, nodAt, onReady }) => {
       );
       lastMove.current = performance.now();
     };
+
+    // Su telefono l'inclinazione fa da cursore. La prima lettura è la posizione
+    // neutra: ognuno tiene il telefono a un'angolazione diversa.
+    // ponytail: assi pensati per il telefono in verticale; in orizzontale sono
+    // scambiati, da correggere con screen.orientation.angle se serve.
+    let neutral: { beta: number; gamma: number } | null = null;
+    let last = { beta: 0, gamma: 0 };
+    const onTilt = ({ beta, gamma }: DeviceOrientationEvent) => {
+      if (beta === null || gamma === null) return;
+      neutral ??= { beta, gamma };
+      pointer.current.set(
+        clamp((gamma - neutral.gamma) / TILT_RANGE, -1, 1),
+        clamp((neutral.beta - beta) / TILT_RANGE, -1, 1),
+      );
+      // Il sensore manda eventi anche da fermo: conta come movimento solo
+      // fuori dalla zona morta, altrimenti lo sguardo a riposo non partirebbe mai.
+      if (Math.abs(beta - last.beta) + Math.abs(gamma - last.gamma) > TILT_DEADZONE) {
+        last = { beta, gamma };
+        lastMove.current = performance.now();
+      }
+    };
+
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    window.addEventListener("deviceorientation", onTilt);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("deviceorientation", onTilt);
+    };
   }, [canvas]);
 
   useFrame(({ clock }, delta) => {
@@ -179,7 +212,13 @@ const AvatarScene: React.FC<{ onReady?: () => void }> = ({ onReady }) => {
     <div
       ref={ref}
       className="h-full w-full cursor-pointer"
-      onClick={() => (nodAt.current = performance.now())}
+      onClick={() => {
+        nodAt.current = performance.now();
+        // Su iOS il primo tocco chiede anche il permesso per il giroscopio
+        (window.DeviceOrientationEvent as OrientationPermission | undefined)
+          ?.requestPermission?.()
+          .catch(() => {});
+      }}
     >
       {size > 0 && (
         <Canvas

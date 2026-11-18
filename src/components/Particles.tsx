@@ -11,8 +11,9 @@ type Dot = { x: number; y: number; vx: number; vy: number };
 
 /**
  * Costellazione di sfondo: punti che fluttuano, si collegano tra vicini e si
- * agganciano al cursore. Come MouseProvider, niente state React: un canvas e
- * un loop. Su touch o con animazioni ridotte non parte affatto.
+ * agganciano al cursore (o al dito, finché tocca lo schermo). Come
+ * MouseProvider, niente state React: un canvas e un loop. Con animazioni
+ * ridotte non parte affatto.
  */
 export function Particles() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -21,8 +22,7 @@ export function Particles() {
     const canvas = ref.current;
     const ctx = canvas?.getContext('2d');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const fine = window.matchMedia('(pointer: fine)').matches;
-    if (!canvas || !ctx || reduced || !fine) return;
+    if (!canvas || !ctx || reduced) return;
 
     const color = getComputedStyle(document.documentElement).getPropertyValue('--color-accent-bright');
     let width = 0;
@@ -34,11 +34,15 @@ export function Particles() {
 
     const resize = () => {
       const dpr = Math.min(window.devicePixelRatio, 2);
+      const sameWidth = width === window.innerWidth;
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = width * dpr;
       canvas.height = height * dpr;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      // Su mobile la barra degli indirizzi cambia l'altezza a ogni scroll: se
+      // la larghezza è la stessa le particelle restano dove sono.
+      if (sameWidth) return;
       dots = Array.from({ length: Math.min(90, Math.round((width * height) / 16000)) }, () => ({
         x: Math.random() * width,
         y: Math.random() * height,
@@ -99,13 +103,21 @@ export function Particles() {
     const onLeave = () => {
       mouseX = mouseY = -Infinity;
     };
+    // Il dito non "esce" dalla finestra: quando si alza, le linee si sganciano.
+    const onRelease = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse') onLeave();
+    };
 
     resize();
     tick();
     window.addEventListener('resize', resize);
     window.addEventListener('pointermove', onMove, { passive: true });
     document.documentElement.addEventListener('pointerleave', onLeave);
+    window.addEventListener('pointerup', onRelease);
+    window.addEventListener('pointercancel', onRelease);
     return () => {
+      window.removeEventListener('pointerup', onRelease);
+      window.removeEventListener('pointercancel', onRelease);
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', resize);
       window.removeEventListener('pointermove', onMove);
