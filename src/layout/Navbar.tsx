@@ -42,30 +42,45 @@ function useAdaptToBackdrop() {
 }
 
 /* Mappa di spostamento per feDisplacementMap: rosso = quanto spostare in x,
-   blu = in y (128 = fermo). È una lente intera, non solo un bordo: lo
-   spostamento cresce dal centro verso l'esterno senza zone piatte, quindi il
-   fondo è ingrandito al centro e si piega sempre di più avvicinandosi al bordo.
-   `sharp` alza l'esponente della curva: sul lato lungo di una pillola la piega
-   forte si concentra nelle due calotte invece di stirare tutta la larghezza. */
-const lensStops = (channel: 'r' | 'b', sharp: number) =>
-  Array.from({ length: 21 }, (_, i) => {
-    const t = i / 10 - 1; // -1 a un capo, 0 al centro, 1 all'altro
-    const bend = LENS_CENTER * t + (1 - LENS_CENTER) * Math.sign(t) * Math.abs(t) ** sharp;
-    const v = Math.round(127.5 - 127.5 * bend);
-    return `<stop offset="${i / 20}" stop-color="rgb(${channel === 'r' ? `${v},0,0` : `0,0,${v}`})"/>`;
-  }).join('');
+   blu = in y (128 = fermo). Il filtro può pescare solo dentro il vetro, quindi
+   la lente è una mappa del riquadro su se stesso: il bordo resta sul bordo e
+   ciò che scorre si piega nell'istante in cui tocca la navbar. Appena dentro,
+   il fondo è stirato lungo l'orlo (pesca verso il bordo); verso il centro, per
+   compenso, è schiacciato. Niente zona piatta: è curvo dall'orlo al centro. */
+
+/** Spostamento (px, ≤ 0 = verso il bordo) a distanza `d` dal bordo, entro una fascia `band`. */
+const rimShift = (d: number, band: number) => band * (d / band) ** LENS_POWER - d;
+
+const lensStops = (channel: 'r' | 'b', length: number, band: number, scale: number) => {
+  const near = Array.from({ length: 13 }, (_, i) => (i / 12) * band);
+  // Un capo e, specchiato, l'altro; in mezzo (sul lato lungo) lo spostamento è zero
+  const points = [
+    ...near.map((d) => [d, rimShift(d, band)]),
+    ...near.reverse().map((d) => [length - d, -rimShift(d, band)]),
+  ];
+  return points
+    .map(([at, shift]) => {
+      const v = Math.round(255 * (0.5 + shift / scale));
+      return `<stop offset="${at / length}" stop-color="rgb(${channel === 'r' ? `${v},0,0` : `0,0,${v}`})"/>`;
+    })
+    .join('');
+};
 
 const displacementMap = (w: number, h: number) => {
+  const band = Math.min(w, h) / 2;
+  // Scala = doppio dello spostamento massimo: usa tutti gli 8 bit della mappa
+  const scale = 2 * Math.max(...Array.from({ length: 50 }, (_, i) => -rimShift((i / 49) * band, band)));
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">
-    <linearGradient id="x">${lensStops('r', Math.max(3, (w / h) * 1.5))}</linearGradient>
-    <linearGradient id="y" x2="0" y2="1">${lensStops('b', Math.max(3, (h / w) * 1.5))}</linearGradient>
+    <linearGradient id="x">${lensStops('r', w, band, scale)}</linearGradient>
+    <linearGradient id="y" x2="0" y2="1">${lensStops('b', h, band, scale)}</linearGradient>
     <rect width="${w}" height="${h}" fill="url(#x)"/>
     <rect width="${w}" height="${h}" fill="url(#y)" style="mix-blend-mode:screen"/>
   </svg>`;
-  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  return { href: `data:image/svg+xml,${encodeURIComponent(svg)}`, scale };
 };
-/** Quota di curvatura già presente al centro (0 = centro piatto, 1 = lente uniforme). */
-const LENS_CENTER = 0.45;
+/** Forza della lente: quanto è schiacciato il fondo al centro (2.5 = 2,5 volte)
+ *  e, di riflesso, quanto è stirato sull'orlo. 1 = vetro piatto. */
+const LENS_POWER = 2.5;
 
 /**
  * Rifrazione da goccia d'acqua: sotto il vetro il fondo si incurva, come
@@ -91,6 +106,7 @@ function useRefraction<T extends HTMLElement>(id: string) {
 
   if (!size) return { ref, style: undefined, filter: null };
   const [w, h] = size;
+  const map = displacementMap(w, h);
   // Poca sfocatura: con i 22px del vetro normale la curvatura non si vedrebbe
   const backdrop = `url(#${id}) blur(${REFRACT_BLUR}px) saturate(190%) brightness(1.15)`;
   return {
@@ -99,8 +115,8 @@ function useRefraction<T extends HTMLElement>(id: string) {
     filter: (
       <svg aria-hidden width="0" height="0" className="absolute">
         <filter id={id} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
-          <feImage href={displacementMap(w, h)} x="0" y="0" width={w} height={h} result="map" />
-          <feDisplacementMap in="SourceGraphic" in2="map" scale={h * REFRACT_STRENGTH} xChannelSelector="R" yChannelSelector="B" />
+          <feImage href={map.href} x="0" y="0" width={w} height={h} result="map" />
+          <feDisplacementMap in="SourceGraphic" in2="map" scale={map.scale} xChannelSelector="R" yChannelSelector="B" />
         </filter>
       </svg>
     ),
@@ -108,9 +124,6 @@ function useRefraction<T extends HTMLElement>(id: string) {
 }
 /** Sfocatura (px) del vetro quando c'è la rifrazione. */
 const REFRACT_BLUR = 4;
-/** Scala del filtro in frazione dell'altezza del vetro: ai bordi il fondo si
- *  sposta di metà di questo valore. */
-const REFRACT_STRENGTH = 0.8;
 
 /** Voci di navigazione con una sola pillola che scivola sotto quella attiva. */
 function Track({ active, className }: { active: string; className: string }) {
