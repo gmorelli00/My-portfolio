@@ -40,7 +40,9 @@ export function ProjectCard({
           reverse ? 'lg:[&>figure]:order-last' : ''
         }`}
       >
+        {/* data-light: gli screenshot sono chiari, la navbar sopra passa al testo scuro */}
         <figure
+          data-light
           onPointerMove={trackPointer}
           className="tilt relative overflow-hidden rounded-card border border-white/10 bg-white/5"
         >
