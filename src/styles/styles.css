@@ -267,6 +267,25 @@
       opacity: 1;
     }
   }
+  /* Al tocco non c'è cursore: fa da cursore lo scroll. Mentre la card attraversa
+     il viewport useScrollTilt porta --px/--py da un capo all'altro,
+     quindi la card si inclina e il riflesso la attraversa. Niente transition
+     sul transform: inseguirebbe lo scroll in ritardo. */
+  @media (prefers-reduced-motion: no-preference) {
+    @media (hover: none), (pointer: coarse) {
+      .tilt {
+        transition: border-color 0.3s, box-shadow 0.3s;
+        /* Più marcato che col mouse: la card è piccola e lo scroll la muove piano,
+           con gli stessi 14deg l'inclinazione non si nota. */
+        transform: perspective(600px)
+          rotateY(calc((var(--px, 0.5) - 0.5) * 16deg))
+          rotateX(calc((0.5 - var(--py, 0.5)) * 32deg));
+      }
+      .tilt::after {
+        opacity: 1;
+      }
+    }
+  }
 
   /* Barra di avanzamento dello scroll: dove scroll() non esiste resta invisibile */
   @supports (animation-timeline: scroll()) {
@@ -291,7 +310,6 @@
 @keyframes scroll-progress {
   from { transform: scaleX(0); }
 }
-
 /* ---------------------------------------------------------------
    Accessibilità: rispetta chi ha disattivato le animazioni
    --------------------------------------------------------------- */

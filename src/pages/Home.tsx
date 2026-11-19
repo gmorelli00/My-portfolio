@@ -10,14 +10,33 @@ import { L } from '../i18n';
 // il primo paint immediato; nel frattempo si vede il segnaposto.
 const AvatarScene = lazy(() => import('../components/AvatarScene'));
 
-function AvatarFrame({ children }: { children: ReactNode }) {
+function AvatarFrame({ ready, children }: { ready: boolean; children: ReactNode }) {
+  // iOS concede il giroscopio solo dopo un tocco sull'avatar (la richiesta è in
+  // AvatarScene): finché non arriva lo si dice. Android non ne ha bisogno.
+  // requestPermission esiste anche su alcuni browser desktop: conta solo al tocco.
+  const [hint, setHint] = useState(
+    () =>
+      window.matchMedia('(hover: none), (pointer: coarse)').matches &&
+      typeof (window.DeviceOrientationEvent as { requestPermission?: unknown } | undefined)
+        ?.requestPermission === 'function',
+  );
+
   return (
-    <div className="animate-rise relative aspect-square w-full max-w-[34rem]">
+    <div
+      className="animate-rise relative aspect-square w-full max-w-[34rem]"
+      onClick={() => ready && setHint(false)}
+    >
+      {hint && ready && (
+        <span className="eyebrow pointer-events-none absolute inset-x-0 bottom-0 text-center">
+          {L('Tocca l’avatar, poi inclina il telefono', 'Tap the avatar, then tilt your phone')}
+        </span>
+      )}
       {/* Alone dietro all'avatar: lo àncora invece di lasciarlo galleggiare */}
       <span
         aria-hidden
         className="absolute inset-[8%] -z-10 rounded-full bg-accent/20 blur-3xl transition-transform duration-300 ease-out"
-        // Parallasse: --mx/--my arrivano da MouseProvider, l'alone va in senso opposto al cursore
+        // Parallasse: --mx/--my arrivano da MouseProvider (o dal giroscopio, vedi
+        // AvatarScene), l'alone va in senso opposto al cursore
         style={{ transform: 'translate3d(calc(var(--mx, 0) * -28px), calc(var(--my, 0) * -28px), 0)' }}
       />
       {children}
@@ -39,10 +58,10 @@ function Home() {
     <>
       <section
         id="home"
-        className="mx-auto flex min-h-[100svh] w-full max-w-6xl scroll-mt-28 flex-col-reverse items-center gap-10 px-6 pb-24 pt-28 md:px-8 lg:flex-row lg:gap-16 lg:pt-32"
+        className="mx-auto flex min-h-[100svh] w-full max-w-6xl scroll-mt-28 flex-col-reverse items-center gap-10 px-6 pb-24 pt-16 md:px-8 md:pt-28 lg:flex-row lg:gap-16 lg:pt-32"
       >
         <div className="flex w-full items-center justify-center lg:w-1/2">
-          <AvatarFrame>
+          <AvatarFrame ready={avatarReady}>
             <div className="avatar-cutout absolute inset-0">
               {/* Fotogramma dell'avatar, stessa inquadratura del canvas: si vede
                   subito e sfuma quando il modello è pronto. Se WebGL manca o il

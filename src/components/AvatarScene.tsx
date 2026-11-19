@@ -59,6 +59,9 @@ const NOD_MS = 700;
 const TILT_RANGE = 25;
 /** Sotto questi gradi di variazione è rumore del sensore, non un movimento. */
 const TILT_DEADZONE = 1.5;
+/** Quota di distanza che la posizione neutra recupera a ogni lettura (~60/s):
+ *  0.004 ≈ 4 secondi per riallinearsi. Più alto = lo sguardo torna prima al centro. */
+const TILT_RECENTER = 0.004;
 
 /** iOS espone il giroscopio solo dopo questa richiesta, fatta da un tocco. */
 type OrientationPermission = { requestPermission?: () => Promise<string> };
@@ -138,10 +141,20 @@ const Avatar: React.FC<AvatarProps> = ({ scale, track, nodAt, onReady }) => {
     const onTilt = ({ beta, gamma }: DeviceOrientationEvent) => {
       if (beta === null || gamma === null) return;
       neutral ??= { beta, gamma };
+      // La posizione neutra insegue piano quella attuale: se la prima lettura è
+      // arrivata col telefono in un'altra posa (sul tavolo, in tasca) lo sguardo
+      // non resta bloccato a fine corsa, e tenendo l'inclinazione torna al centro.
+      neutral.beta += (beta - neutral.beta) * TILT_RECENTER;
+      neutral.gamma += (gamma - neutral.gamma) * TILT_RECENTER;
       pointer.current.set(
         clamp((gamma - neutral.gamma) / TILT_RANGE, -1, 1),
         clamp((neutral.beta - beta) / TILT_RANGE, -1, 1),
       );
+      // Stesse variabili che MouseProvider scrive col mouse (y verso il basso):
+      // su telefono la parallasse dell'alone segue l'inclinazione.
+      const root = document.documentElement.style;
+      root.setProperty("--mx", pointer.current.x.toFixed(3));
+      root.setProperty("--my", (-pointer.current.y).toFixed(3));
       // Il sensore manda eventi anche da fermo: conta come movimento solo
       // fuori dalla zona morta, altrimenti lo sguardo a riposo non partirebbe mai.
       if (Math.abs(beta - last.beta) + Math.abs(gamma - last.gamma) > TILT_DEADZONE) {

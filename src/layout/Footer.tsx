@@ -36,7 +36,7 @@ function Footer() {
                 target={contact.platform === 'Email' ? undefined : '_blank'}
                 rel={contact.platform === 'Email' ? undefined : 'noopener noreferrer'}
                 aria-label={contact.ariaLabel}
-                className="glass flex items-center gap-2.5 rounded-full px-4 py-2.5 text-sm text-muted transition-colors hover:bg-white/10 hover:text-white"
+                className="glass flex items-center gap-2.5 rounded-full px-4 py-2.5 text-sm text-muted transition-[color,background-color,scale] duration-300 hover:bg-white/10 hover:text-white active:scale-[0.97]"
               >
                 <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" aria-hidden>
                   {ICONS[contact.platform]}

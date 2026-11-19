@@ -3,8 +3,8 @@ import React from 'react';
 type ButtonVariant = 'primary' | 'secondary';
 
 const base =
-  'inline-flex items-center justify-center gap-2 rounded-full px-7 py-3.5 text-base font-medium ' +
-  'transition-[background-color,color,border-color,box-shadow] duration-300';
+  'inline-flex items-center justify-center gap-2 rounded-full px-5 py-3.5 text-base sm:px-7 font-medium ' +
+  'transition-[background-color,color,border-color,box-shadow,scale] duration-300 active:scale-[0.97]';
 
 const variants: Record<ButtonVariant, string> = {
   primary: 'bg-accent text-ink-deep hover:bg-accent-bright hover:shadow-[0_10px_32px_-8px] hover:shadow-accent/60',
